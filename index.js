@@ -8,6 +8,40 @@ https://sprig.hackclub.com/gallery/getting_started
 @addedOn: 2024-00-00
 */
 
+const step_sound = tune`
+37.5: C4~37.5,
+37.5: D4~37.5,
+1125`
+
+const exit_sound = tune`
+230.76923076923077: G5-230.76923076923077,
+230.76923076923077: A5-230.76923076923077,
+6923.076923076923`
+
+const relic_sound = tune`
+37.5: A5-37.5,
+37.5: B5-37.5,
+1125`
+
+const win_sound = tune`
+208.33333333333334: C5-208.33333333333334,
+208.33333333333334: D5-208.33333333333334,
+208.33333333333334: E5-208.33333333333334,
+208.33333333333334: F5-208.33333333333334,
+208.33333333333334: G5-208.33333333333334,
+208.33333333333334: A5-208.33333333333334,
+208.33333333333334: B5-208.33333333333334,
+208.33333333333334: B5-208.33333333333334,
+208.33333333333334: B5-208.33333333333334,
+4791.666666666667`
+
+const death_sound = tune`
+200: C4/200,
+200: C4/200,
+200: C4/200,
+200: C4/200,
+200: C4/200,
+5400`
 
 const player = "p"
 const wall = "w"
@@ -15,26 +49,27 @@ const exit = "e"
 const relic = "r"
 const trap = "t"
 const line = "l"
+const activated_exit = "a"
 
 setLegend(
-  [ player, bitmap`
-......9999......
-.....999999.....
-....999..999....
-....99....99....
-....99....99....
-....999..999....
-.....999999.....
-......9999......
-....9..99.......
-.....999999.....
-.......99..9....
-.......99.......
-.......99.......
-......9..9......
-.....9....9.....
-....9......9....`],
-  [ wall, bitmap`
+  [player, bitmap`
+9999999999999999
+9999999999999999
+9999999999999999
+9994449999444999
+9994449999444999
+9994449999444999
+9999999999999999
+9999999999999999
+9992999999999999
+9929229999999999
+9992292299999999
+9999922922999999
+9999999229229999
+9999999992292999
+9999999999929999
+9999999999999999`],
+  [wall, bitmap`
 LLLLLLLLLLLLLLLL
 L0L0L0L0L0L0L0LL
 LL0000000000000L
@@ -51,7 +86,24 @@ LL0000000000000L
 L0000000000000LL
 LL0L0L0L0L0L0L0L
 LLLLLLLLLLLLLLLL`],
-  [ exit, bitmap`
+  [exit, bitmap`
+...7777777777...
+...7C33333337...
+...73C3333337...
+...73C3333337...
+...733C333337...
+...733C333337...
+...7333C33337...
+...7333C33337...
+...73333C3337...
+...73333C3337...
+...733333C337...
+...733333C337...
+...7333333C37...
+...7333333C37...
+...73333333C7...
+...7777777777...`],
+  [activated_exit, bitmap`
 ...7777777777...
 ...7D44444447...
 ...74D4444447...
@@ -68,7 +120,7 @@ LLLLLLLLLLLLLLLL`],
 ...7444444D47...
 ...74444444D7...
 ...7777777777...`],
-  [ relic, bitmap`
+  [relic, bitmap`
 ................
 ................
 ....33333333....
@@ -85,7 +137,7 @@ LLLLLLLLLLLLLLLL`],
 ................
 ................
 ................`],
-  [ line, bitmap`
+  [line, bitmap`
 DDDDDDDDDDDDDDDD
 DDDDDDDDDDDDDDDD
 DDDDDDDDDDDDDDDD
@@ -104,10 +156,10 @@ DDDDDDDDDDDDDDDD
 DDDDDDDDDDDDDDDD`]
 )
 
-setSolids([wall,player,line])
+setSolids([wall, player, line])
 
 let level = 0
-const levels = [  
+const levels = [
   map`
 wwwwwww
 wwwwwww
@@ -249,42 +301,43 @@ w.w.............w...w
 w.w.wwwwwwwwwwwwwww.w
 wp.............r..e.w
 wwwwwwwwwwwwwwwwwwwww`
-
-
-
 ]
 
 setMap(levels[level])
 
+addText("reset with", { x: 5, y: 3, color: color`4` })
+addText("left button (j) on", { x: 1, y: 4, color: color`4` })
+addText("the right", { x: 5, y: 5, color: color`4` })
+
 setPushables({
-  [ player ]: []
+  [player]: []
 })
 
 onInput("s", () => {
   const player_data = getFirst(player)
   if (getTile(player_data.x, player_data.y + 1).length == 0 || getTile(player_data.x, player_data.y + 1)[0].type != "w" && getTile(player_data.x, player_data.y + 1)[0].type != "w") {
-  addSprite(player_data.x, player_data.y, line)
+    addSprite(player_data.x, player_data.y, line)
   }
   player_data.y += 1
 })
 onInput("w", () => {
   const player_data = getFirst(player)
-  if (getTile(player_data.x, player_data.y - 1).length == 0 || getTile(player_data.x, player_data.y - 1 )[0].type != "w" && getTile(player_data.x, player_data.y - 1)[0].type != "l") {
-  addSprite(player_data.x, player_data.y, line)
+  if (getTile(player_data.x, player_data.y - 1).length == 0 || getTile(player_data.x, player_data.y - 1)[0].type != "w" && getTile(player_data.x, player_data.y - 1)[0].type != "l") {
+    addSprite(player_data.x, player_data.y, line)
   }
   player_data.y -= 1
 })
 onInput("d", () => {
   const player_data = getFirst(player)
   if (getTile(player_data.x + 1, player_data.y).length == 0 || getTile(player_data.x + 1, player_data.y)[0].type != "w" && getTile(player_data.x + 1, player_data.y)[0].type != "l") {
-  addSprite(player_data.x, player_data.y, line)
+    addSprite(player_data.x, player_data.y, line)
   }
   player_data.x += 1
 })
-onInput("a", () => {  
+onInput("a", () => {
   const player_data = getFirst(player)
   if (getTile(player_data.x - 1, player_data.y).length == 0 || getTile(player_data.x - 1, player_data.y)[0].type != "w" && getTile(player_data.x - 1, player_data.y)[0].type != "l") {
-  addSprite(player_data.x, player_data.y, line)
+    addSprite(player_data.x, player_data.y, line)
   }
   player_data.x -= 1
 })
@@ -293,24 +346,42 @@ onInput("j", () => {
 })
 
 afterInput(() => {
+  playTune(step_sound)
+
   const targetNumber = tilesWith(relic).length;
 
-  const numberCovered = tilesWith(player, exit).length;
+  const players_on_exit = tilesWith(player, activated_exit).length;
 
-  if (targetNumber == 0 && numberCovered != 0) {
+
+  if (targetNumber == 0 && players_on_exit != 0) {
+    playTune(exit_sound)
     level = level + 1
-        const currentLevel = levels[level];
+    const currentLevel = levels[level];
 
     // make sure the level exists and if so set the map
     // otherwise, we have finished the last level, there is no level
     // after the last level
     if (currentLevel !== undefined) {
+      clearText()
       setMap(currentLevel);
     } else {
       addText("you win!", { y: 7, color: color`9` });
     }
   }
-  if (tilesWith(relic,player).length != 0) {
+  if (tilesWith(relic, player).length != 0) {
+    playTune(relic_sound)
     getTile(getFirst(player).x, getFirst(player).y)[1].remove()
+    const targetNumber = tilesWith(relic).length;
+    if (targetNumber == 0) {
+      const exits = getAll(exit)
+      if (exits.length != 0) {
+        exits[0].remove()
+        addSprite(exits[0].x, exits[0].y, activated_exit)
+      }
+    }
+  }
+  if (tilesWith(player, exit).length != 0) {
+    playTune(death_sound)
+    setMap(levels[level])
   }
 })
